@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import MoodChart from "./components/MoodChart";
-import { getAuthUrl } from "./utils/spotify";
 import { generateMoodReflection } from "./utils/gpt";
 import { getRecentTracks, getAudioFeatures } from "./utils/spotifyApi";
 
@@ -11,7 +10,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Get token from query params (not hash!) or localStorage
+  // ✅ Get token from query params or localStorage
   useEffect(() => {
     const stored = localStorage.getItem("spotify_token");
     const queryParams = new URLSearchParams(window.location.search);
@@ -20,15 +19,12 @@ function App() {
     if (accessToken) {
       setToken(accessToken);
       localStorage.setItem("spotify_token", accessToken);
-
-      // ✅ Clean URL (remove ?access_token=...)
-      window.history.replaceState({}, document.title, "/");
+      window.history.replaceState({}, document.title, "/dashboard");
     } else if (stored) {
       setToken(stored);
     }
   }, []);
 
-  // 🎧 Fetch recent tracks and mood features
   useEffect(() => {
     let isMounted = true;
 
@@ -75,8 +71,8 @@ function App() {
   }, [token]);
 
   const login = () => {
-    // 🔁 Redirects to backend /login → Spotify → /callback → frontend
-    window.location.href = getAuthUrl(); // usually returns http://localhost:4000/login
+    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
+    window.location.href = `${backendURL}/login`;
   };
 
   return (

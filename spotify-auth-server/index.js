@@ -68,7 +68,7 @@ app.get("/callback", async (req, res) => {
 
     res.redirect(`${FRONTEND_URI}/dashboard?${params}`);
   } catch (error) {
-    console.error("Error getting tokens:", error.response.data);
+    console.error("Error getting tokens:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to get tokens" });
   }
 });
