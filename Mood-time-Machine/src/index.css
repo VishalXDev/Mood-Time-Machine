@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Base styles */
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+  body {
+    @apply antialiased bg-gray-900 text-gray-100;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 rounded-full font-medium transition-all duration-300 
+           bg-gradient-to-r from-purple-500 to-blue-600 hover:from-purple-600 
+           hover:to-blue-700 shadow-lg hover:shadow-xl;
+  }
+  
+  .glass-card {
+    @apply bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 
+           rounded-xl shadow-lg transition-all duration-300 hover:border-gray-600/50;
+  }
+}
