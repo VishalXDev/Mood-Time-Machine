@@ -1,3 +1,4 @@
+// index.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -16,7 +17,6 @@ const {
   FRONTEND_URI
 } = process.env;
 
-// 1. Redirect to Spotify login
 app.get("/login", (req, res) => {
   const scopes = [
     "user-read-recently-played",
@@ -34,7 +34,6 @@ app.get("/login", (req, res) => {
   res.redirect(authURL);
 });
 
-// 2. Spotify redirects here → exchange code for token
 app.get("/callback", async (req, res) => {
   const code = req.query.code || null;
 
@@ -64,14 +63,14 @@ app.get("/callback", async (req, res) => {
       expires_in
     });
 
-    res.redirect(`${FRONTEND_URI}/dashboard?${params}`);
+    // ✅ Updated to redirect to root "/"
+    res.redirect(`${FRONTEND_URI}/?${params}`);
   } catch (error) {
     console.error("Error getting tokens:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to get tokens" });
   }
 });
 
-// 3. Token refresh endpoint
 app.get("/refresh_token", async (req, res) => {
   const refresh_token = req.query.refresh_token;
 

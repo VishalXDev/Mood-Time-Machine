@@ -10,6 +10,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // ✅ Refresh token logic
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("spotify_refresh_token");
     const backendURL = process.env.REACT_APP_BACKEND_URL;
@@ -27,9 +28,11 @@ function App() {
     } catch (err) {
       console.error("❌ Error refreshing access token:", err);
     }
+
     return null;
   };
 
+  // ✅ Extract tokens from URL and store in localStorage
   useEffect(() => {
     const stored = localStorage.getItem("spotify_token");
     const queryParams = new URLSearchParams(window.location.search);
@@ -37,17 +40,23 @@ function App() {
     const refreshToken = queryParams.get("refresh_token");
 
     if (accessToken) {
+      console.log("✅ Access token received from callback:", accessToken);
       setToken(accessToken);
       localStorage.setItem("spotify_token", accessToken);
+
       if (refreshToken) {
+        console.log("✅ Refresh token stored:", refreshToken);
         localStorage.setItem("spotify_refresh_token", refreshToken);
       }
-      window.history.replaceState({}, document.title, "/dashboard");
+
+      // ✅ Clean up URL after storing tokens
+      window.history.replaceState({}, document.title, window.location.pathname);
     } else if (stored) {
       setToken(stored);
     }
   }, []);
 
+  // ✅ Fetch recent tracks and audio features
   useEffect(() => {
     let isMounted = true;
 
@@ -57,17 +66,17 @@ function App() {
         const recent = await getRecentTracks(token);
 
         if (!recent.length && !retry) {
-          console.log("🔐 Attempting token refresh...");
+          console.log("🔐 Token might be expired, attempting refresh...");
           const newToken = await refreshAccessToken();
           if (newToken) {
-            setToken(newToken); // triggers re-render and re-run
+            setToken(newToken); // triggers re-run
           }
           return;
         }
 
         const ids = recent.map((t) => t.track.id).filter(Boolean);
         if (!ids.length) {
-          console.warn("⚠️ No track IDs provided to getAudioFeatures.");
+          console.warn("⚠️ No track IDs found.");
           return;
         }
 
@@ -95,9 +104,7 @@ function App() {
           console.error(err);
         }
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoading(false);
       }
     };
 
@@ -108,6 +115,7 @@ function App() {
     };
   }, [token]);
 
+  // ✅ Trigger login flow
   const login = () => {
     const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
     window.location.href = `${backendURL}/login`;
@@ -154,7 +162,9 @@ function App() {
                   {track.name} - {track.artist}
                 </div>
                 <div className="text-sm text-gray-300">
-                  Valence: {track.valence?.toFixed(2)} | Energy: {track.energy?.toFixed(2)} | Danceability: {track.danceability?.toFixed(2)}
+                  Valence: {track.valence?.toFixed(2)} | Energy:{" "}
+                  {track.energy?.toFixed(2)} | Danceability:{" "}
+                  {track.danceability?.toFixed(2)}
                 </div>
               </li>
             ))}

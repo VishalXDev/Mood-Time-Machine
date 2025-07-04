@@ -17,7 +17,7 @@ export const getRecentTracks = async (token, limit = 20) => {
 
     if (res.status === 401) {
       console.warn("⚠️ Access token expired or invalid");
-      throw new Error("Unauthorized"); // So App.js can catch it
+      throw new Error("Unauthorized");
     }
 
     if (!res.ok) {
@@ -32,20 +32,20 @@ export const getRecentTracks = async (token, limit = 20) => {
     return data.items || [];
   } catch (error) {
     console.error("❌ Error in getRecentTracks:", error.message);
-    if (error.message === "Unauthorized") throw error; // trigger retry in App.js
+    if (error.message === "Unauthorized") throw error;
     return [];
   }
 };
 
 /**
  * Fetch audio features (valence, energy, danceability, etc.) for track IDs.
- * If token is expired (401), throws "Unauthorized" to trigger refresh.
+ * Spotify limits to 100 IDs max, so we slice and dedupe.
  */
 export const getAudioFeatures = async (token, trackIds = []) => {
-  const ids = trackIds.join(",");
+  const ids = [...new Set(trackIds.filter(Boolean))].slice(0, 100).join(",");
 
-  if (!ids || trackIds.length === 0) {
-    console.warn("⚠️ No track IDs provided to getAudioFeatures.");
+  if (!ids) {
+    console.warn("⚠️ No valid track IDs provided to getAudioFeatures.");
     return [];
   }
 
@@ -60,8 +60,8 @@ export const getAudioFeatures = async (token, trackIds = []) => {
     );
 
     if (res.status === 401) {
-      console.warn("⚠️ Access token expired or invalid");
-      throw new Error("Unauthorized"); // So App.js can catch it
+      console.warn("⚠️ Token expired");
+      throw new Error("Unauthorized");
     }
 
     if (!res.ok) {
@@ -76,7 +76,7 @@ export const getAudioFeatures = async (token, trackIds = []) => {
     return data.audio_features || [];
   } catch (error) {
     console.error("❌ Error in getAudioFeatures:", error.message);
-    if (error.message === "Unauthorized") throw error; // trigger retry in App.js
+    if (error.message === "Unauthorized") throw error;
     return [];
   }
 };
