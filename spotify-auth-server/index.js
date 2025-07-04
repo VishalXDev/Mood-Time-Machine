@@ -16,7 +16,7 @@ const {
   FRONTEND_URI
 } = process.env;
 
-// Step 1: Redirect user to Spotify login
+// 1. Redirect to Spotify login
 app.get("/login", (req, res) => {
   const scopes = [
     "user-read-recently-played",
@@ -24,18 +24,17 @@ app.get("/login", (req, res) => {
     "user-library-read"
   ].join(" ");
 
-  const authURL = `https://accounts.spotify.com/authorize?` +
-    querystring.stringify({
-      response_type: "code",
-      client_id: CLIENT_ID,
-      scope: scopes,
-      redirect_uri: REDIRECT_URI
-    });
+  const authURL = `https://accounts.spotify.com/authorize?` + querystring.stringify({
+    response_type: "code",
+    client_id: CLIENT_ID,
+    scope: scopes,
+    redirect_uri: REDIRECT_URI
+  });
 
   res.redirect(authURL);
 });
 
-// Step 2: Spotify redirects to this route with a code → we exchange it for an access token
+// 2. Spotify redirects here → exchange code for token
 app.get("/callback", async (req, res) => {
   const code = req.query.code || null;
 
@@ -59,9 +58,6 @@ app.get("/callback", async (req, res) => {
 
     const { access_token, refresh_token, expires_in } = response.data;
 
-    console.log("✅ Access Token Issued:", access_token);
-
-    // Redirect to frontend with access_token in query string
     const params = querystring.stringify({
       access_token,
       refresh_token,
@@ -70,8 +66,37 @@ app.get("/callback", async (req, res) => {
 
     res.redirect(`${FRONTEND_URI}/dashboard?${params}`);
   } catch (error) {
-    console.error("❌ Error getting tokens:", error.response?.data || error.message);
+    console.error("Error getting tokens:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to get tokens" });
+  }
+});
+
+// 3. Token refresh endpoint
+app.get("/refresh_token", async (req, res) => {
+  const refresh_token = req.query.refresh_token;
+
+  try {
+    const response = await axios.post(
+      "https://accounts.spotify.com/api/token",
+      querystring.stringify({
+        grant_type: "refresh_token",
+        refresh_token
+      }),
+      {
+        headers: {
+          Authorization:
+            "Basic " +
+            Buffer.from(CLIENT_ID + ":" + CLIENT_SECRET).toString("base64"),
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      }
+    );
+
+    const { access_token } = response.data;
+    res.json({ access_token });
+  } catch (error) {
+    console.error("Error refreshing token:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to refresh token" });
   }
 });
 

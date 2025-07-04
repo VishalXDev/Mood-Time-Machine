@@ -1,4 +1,3 @@
-// App.js
 import { useEffect, useState } from "react";
 import MoodChart from "./components/MoodChart";
 import { generateMoodReflection } from "./utils/gpt";
@@ -11,49 +10,73 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Get token from query params or localStorage
+  const refreshAccessToken = async () => {
+    const refreshToken = localStorage.getItem("spotify_refresh_token");
+    const backendURL = process.env.REACT_APP_BACKEND_URL;
+
+    if (!refreshToken) return null;
+
+    try {
+      const res = await fetch(`${backendURL}/refresh_token?refresh_token=${refreshToken}`);
+      const data = await res.json();
+      if (data.access_token) {
+        localStorage.setItem("spotify_token", data.access_token);
+        console.log("🔄 Refreshed token:", data.access_token);
+        return data.access_token;
+      }
+    } catch (err) {
+      console.error("❌ Error refreshing access token:", err);
+    }
+    return null;
+  };
+
   useEffect(() => {
     const stored = localStorage.getItem("spotify_token");
     const queryParams = new URLSearchParams(window.location.search);
     const accessToken = queryParams.get("access_token");
+    const refreshToken = queryParams.get("refresh_token");
 
     if (accessToken) {
-      console.log("✅ Access Token:", accessToken);
       setToken(accessToken);
       localStorage.setItem("spotify_token", accessToken);
+      if (refreshToken) {
+        localStorage.setItem("spotify_refresh_token", refreshToken);
+      }
       window.history.replaceState({}, document.title, "/dashboard");
     } else if (stored) {
-      console.log("✅ Token from storage:", stored);
       setToken(stored);
-    } else {
-      console.warn("❌ No Spotify token found.");
     }
   }, []);
 
-  // 🎧 Fetch tracks + features
   useEffect(() => {
     let isMounted = true;
 
-    const fetchTracksAndFeatures = async () => {
+    const fetchTracksAndFeatures = async (retry = false) => {
       try {
         setError(null);
-        if (!token) return;
-
         const recent = await getRecentTracks(token);
-        const ids = recent.map((t) => t.track?.id).filter(Boolean);
 
+        if (!recent.length && !retry) {
+          console.log("🔐 Attempting token refresh...");
+          const newToken = await refreshAccessToken();
+          if (newToken) {
+            setToken(newToken); // triggers re-render and re-run
+          }
+          return;
+        }
+
+        const ids = recent.map((t) => t.track.id).filter(Boolean);
         if (!ids.length) {
-          console.warn("⚠️ No valid track IDs found.");
-          setError("No recent tracks found.");
+          console.warn("⚠️ No track IDs provided to getAudioFeatures.");
           return;
         }
 
         const features = await getAudioFeatures(token, ids);
 
         const enrichedTracks = recent.map((item, i) => ({
-          id: item.track?.id,
-          name: item.track?.name,
-          artist: item.track?.artists[0]?.name,
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists[0].name,
           played_at: item.played_at,
           valence: features[i]?.valence,
           energy: features[i]?.energy,
@@ -68,8 +91,8 @@ function App() {
         }
       } catch (err) {
         if (isMounted) {
-          console.error("❌ Error fetching data:", err);
           setError("Failed to fetch data. Please try again.");
+          console.error(err);
         }
       } finally {
         if (isMounted) {
@@ -131,7 +154,7 @@ function App() {
                   {track.name} - {track.artist}
                 </div>
                 <div className="text-sm text-gray-300">
-                  Valence: {track.valence?.toFixed(2) || "N/A"} | Energy: {track.energy?.toFixed(2) || "N/A"} | Danceability: {track.danceability?.toFixed(2) || "N/A"}
+                  Valence: {track.valence?.toFixed(2)} | Energy: {track.energy?.toFixed(2)} | Danceability: {track.danceability?.toFixed(2)}
                 </div>
               </li>
             ))}
