@@ -1,3 +1,4 @@
+// ✅ spotifyApi.js
 export const getRecentTracks = async (token, limit = 20) => {
   try {
     const res = await fetch(
@@ -11,14 +12,14 @@ export const getRecentTracks = async (token, limit = 20) => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error("❌ Failed to fetch recent tracks:", errorData);
+      console.error("\u274C Failed to fetch recent tracks:", errorData);
       return [];
     }
 
     const data = await res.json();
     return data.items || [];
   } catch (error) {
-    console.error("❌ Error in getRecentTracks:", error);
+    console.error("\u274C Error in getRecentTracks:", error);
     return [];
   }
 };
@@ -27,7 +28,7 @@ export const getAudioFeatures = async (token, trackIds = []) => {
   const ids = trackIds.join(',');
 
   if (!ids || trackIds.length === 0) {
-    console.warn("⚠️ No track IDs provided to getAudioFeatures.");
+    console.warn("\u26A0\uFE0F No track IDs provided to getAudioFeatures.");
     return [];
   }
 
@@ -43,14 +44,14 @@ export const getAudioFeatures = async (token, trackIds = []) => {
 
     if (!res.ok) {
       const errorData = await res.json();
-      console.error("❌ Failed to fetch audio features:", errorData);
+      console.error("\u274C Failed to fetch audio features:", errorData);
       return [];
     }
 
     const data = await res.json();
     return data.audio_features || [];
   } catch (error) {
-    console.error("❌ Error in getAudioFeatures:", error);
+    console.error("\u274C Error in getAudioFeatures:", error);
     return [];
   }
 };

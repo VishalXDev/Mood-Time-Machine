@@ -1,3 +1,4 @@
+// App.js
 import { useEffect, useState } from "react";
 import MoodChart from "./components/MoodChart";
 import { generateMoodReflection } from "./utils/gpt";
@@ -17,28 +18,42 @@ function App() {
     const accessToken = queryParams.get("access_token");
 
     if (accessToken) {
+      console.log("✅ Access Token:", accessToken);
       setToken(accessToken);
       localStorage.setItem("spotify_token", accessToken);
       window.history.replaceState({}, document.title, "/dashboard");
     } else if (stored) {
+      console.log("✅ Token from storage:", stored);
       setToken(stored);
+    } else {
+      console.warn("❌ No Spotify token found.");
     }
   }, []);
 
+  // 🎧 Fetch tracks + features
   useEffect(() => {
     let isMounted = true;
 
     const fetchTracksAndFeatures = async () => {
       try {
         setError(null);
+        if (!token) return;
+
         const recent = await getRecentTracks(token);
-        const ids = recent.map((t) => t.track.id);
+        const ids = recent.map((t) => t.track?.id).filter(Boolean);
+
+        if (!ids.length) {
+          console.warn("⚠️ No valid track IDs found.");
+          setError("No recent tracks found.");
+          return;
+        }
+
         const features = await getAudioFeatures(token, ids);
 
         const enrichedTracks = recent.map((item, i) => ({
-          id: item.track.id,
-          name: item.track.name,
-          artist: item.track.artists[0].name,
+          id: item.track?.id,
+          name: item.track?.name,
+          artist: item.track?.artists[0]?.name,
           played_at: item.played_at,
           valence: features[i]?.valence,
           energy: features[i]?.energy,
@@ -53,8 +68,8 @@ function App() {
         }
       } catch (err) {
         if (isMounted) {
+          console.error("❌ Error fetching data:", err);
           setError("Failed to fetch data. Please try again.");
-          console.error(err);
         }
       } finally {
         if (isMounted) {
@@ -116,9 +131,7 @@ function App() {
                   {track.name} - {track.artist}
                 </div>
                 <div className="text-sm text-gray-300">
-                  Valence: {track.valence?.toFixed(2)} | Energy:{" "}
-                  {track.energy?.toFixed(2)} | Danceability:{" "}
-                  {track.danceability?.toFixed(2)}
+                  Valence: {track.valence?.toFixed(2) || "N/A"} | Energy: {track.energy?.toFixed(2) || "N/A"} | Danceability: {track.danceability?.toFixed(2) || "N/A"}
                 </div>
               </li>
             ))}

@@ -1,3 +1,4 @@
+// ✅ MoodChart.js
 import {
   Chart as ChartJS,
   LineElement,
@@ -7,6 +8,7 @@ import {
   Tooltip,
   Legend,
   Title,
+  Filler,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -17,7 +19,8 @@ ChartJS.register(
   PointElement,
   Tooltip,
   Legend,
-  Title
+  Title,
+  Filler // ✅ Register the missing Filler plugin
 );
 
 const MoodChart = ({ tracks }) => {

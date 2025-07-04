@@ -16,7 +16,7 @@ const {
   FRONTEND_URI
 } = process.env;
 
-// 1. Redirect user to Spotify login
+// Step 1: Redirect user to Spotify login
 app.get("/login", (req, res) => {
   const scopes = [
     "user-read-recently-played",
@@ -35,7 +35,7 @@ app.get("/login", (req, res) => {
   res.redirect(authURL);
 });
 
-// 2. Spotify redirects to this route with code → exchange for token
+// Step 2: Spotify redirects to this route with a code → we exchange it for an access token
 app.get("/callback", async (req, res) => {
   const code = req.query.code || null;
 
@@ -59,7 +59,9 @@ app.get("/callback", async (req, res) => {
 
     const { access_token, refresh_token, expires_in } = response.data;
 
-    // Redirect back to frontend with tokens as query params
+    console.log("✅ Access Token Issued:", access_token);
+
+    // Redirect to frontend with access_token in query string
     const params = querystring.stringify({
       access_token,
       refresh_token,
@@ -68,12 +70,12 @@ app.get("/callback", async (req, res) => {
 
     res.redirect(`${FRONTEND_URI}/dashboard?${params}`);
   } catch (error) {
-    console.error("Error getting tokens:", error.response?.data || error.message);
+    console.error("❌ Error getting tokens:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to get tokens" });
   }
 });
 
 const PORT = 4000;
 app.listen(PORT, () => {
-  console.log(`Spotify Auth Server running at http://localhost:${PORT}`);
+  console.log(`🎵 Spotify Auth Server running at http://localhost:${PORT}`);
 });
