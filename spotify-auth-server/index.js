@@ -3,7 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const querystring = require("querystring");
-const { OpenAI } = require("openai");
+const OpenAI = require("openai");
 
 dotenv.config();
 const app = express();
@@ -19,7 +19,6 @@ const {
 } = process.env;
 
 // 🎧 Spotify OAuth routes...
-
 app.get("/login", (req, res) => {
   const scopes = [
     "user-read-recently-played",
@@ -101,7 +100,7 @@ app.get("/refresh_token", async (req, res) => {
   }
 });
 
-// 🔮 New GPT Reflection Endpoint
+// 🔮 GPT Mood Reflection Endpoint
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 app.post("/generate-reflection", async (req, res) => {
@@ -135,7 +134,12 @@ app.post("/generate-reflection", async (req, res) => {
   }
 });
 
-// 🚀 Dynamic port
+// 🟢 Health check (optional)
+app.get("/", (req, res) => {
+  res.send("✅ Mood-Time-Machine backend running.");
+});
+
+// 🚀 Port
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🎵 Spotify Auth Server running at http://localhost:${PORT}`);

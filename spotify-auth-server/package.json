@@ -1,7 +1,7 @@
 {
   "name": "mood-time-machine-backend",
   "version": "1.0.0",
-  "description": "Backend server for Mood Time Machine",
+  "description": "Backend server for Mood Time Machine using Spotify and OpenAI APIs",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -14,6 +14,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "openai": "^5.8.2",
     "querystring": "^0.2.1"
   }
 }
