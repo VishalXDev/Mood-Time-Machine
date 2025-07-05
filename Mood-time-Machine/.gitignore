@@ -10,5 +10,5 @@ package-lock.json
 
 #extra files
 # public
-tailwind.config.js
-postcss.config.js
+# tailwind.config.js
+# postcss.config.js
