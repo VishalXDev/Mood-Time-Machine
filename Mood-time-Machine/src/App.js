@@ -2,7 +2,18 @@ import { useEffect, useState, useMemo } from "react";
 import MoodChart from "./components/MoodChart";
 import { generateMoodReflection } from "./utils/gpt";
 import { getRecentTracks, getAudioFeatures } from "./utils/spotifyApi";
-import { FiMusic, FiTrendingUp, FiClock, FiLogIn, FiZap, FiHeart, FiPlay, FiUser, FiStar, FiHeadphones } from "react-icons/fi";
+import {
+  FiMusic,
+  FiTrendingUp,
+  FiClock,
+  FiLogIn,
+  FiZap,
+  FiHeart,
+  FiPlay,
+  FiUser,
+  FiStar,
+  FiHeadphones,
+} from "react-icons/fi";
 
 function App() {
   const [token, setToken] = useState("");
@@ -13,15 +24,18 @@ function App() {
   const [showStats, setShowStats] = useState(false);
 
   // Dummy reflections for when OpenAI key is exceeded - wrapped in useMemo
-  const dummyReflections = useMemo(() => [
-    "Your music choices reveal a fascinating emotional journey. The blend of high-energy tracks with more contemplative pieces suggests you're navigating through different moods with grace. Your listening patterns show a healthy balance between seeking excitement and finding comfort in familiar melodies. Keep embracing this musical diversity - it's a beautiful reflection of your multifaceted personality.",
-    
-    "There's something beautifully expressive about your recent musical selections. The mix of valence and energy in your tracks tells a story of someone who isn't afraid to feel deeply. Your playlist is like an emotional palette, painting different shades of your inner world. This kind of musical exploration often indicates a creative and emotionally intelligent soul.",
-    
-    "Your music taste is painting a picture of resilience and growth. The way you move between different energy levels in your tracks shows an intuitive understanding of what your heart needs. There's a therapeutic quality to how you're curating your sonic environment - it's like you're creating a personal soundtrack for healing and self-discovery.",
-    
-    "The emotional intelligence in your music choices is striking. You're not just listening to songs; you're crafting experiences that match and guide your emotional state. This kind of mindful music consumption suggests someone who values emotional authenticity and isn't afraid to explore the full spectrum of human feelings."
-  ], []);
+  const dummyReflections = useMemo(
+    () => [
+      "Your music choices reveal a fascinating emotional journey. The blend of high-energy tracks with more contemplative pieces suggests you're navigating through different moods with grace. Your listening patterns show a healthy balance between seeking excitement and finding comfort in familiar melodies. Keep embracing this musical diversity - it's a beautiful reflection of your multifaceted personality.",
+
+      "There's something beautifully expressive about your recent musical selections. The mix of valence and energy in your tracks tells a story of someone who isn't afraid to feel deeply. Your playlist is like an emotional palette, painting different shades of your inner world. This kind of musical exploration often indicates a creative and emotionally intelligent soul.",
+
+      "Your music taste is painting a picture of resilience and growth. The way you move between different energy levels in your tracks shows an intuitive understanding of what your heart needs. There's a therapeutic quality to how you're curating your sonic environment - it's like you're creating a personal soundtrack for healing and self-discovery.",
+
+      "The emotional intelligence in your music choices is striking. You're not just listening to songs; you're crafting experiences that match and guide your emotional state. This kind of mindful music consumption suggests someone who values emotional authenticity and isn't afraid to explore the full spectrum of human feelings.",
+    ],
+    []
+  );
 
   const refreshAccessToken = async () => {
     const refreshToken = localStorage.getItem("spotify_refresh_token");
@@ -30,7 +44,9 @@ function App() {
     if (!refreshToken) return null;
 
     try {
-      const res = await fetch(`${backendURL}/refresh_token?refresh_token=${refreshToken}`);
+      const res = await fetch(
+        `${backendURL}/refresh_token?refresh_token=${refreshToken}`
+      );
       const data = await res.json();
       if (data.access_token) {
         localStorage.setItem("spotify_token", data.access_token);
@@ -97,16 +113,19 @@ function App() {
         if (isMounted) {
           setTracks(enrichedTracks);
           setLoading(true);
-          
+
           // Show stats after a brief delay for better UX
           setTimeout(() => setShowStats(true), 500);
-          
+
           try {
             const moodText = await generateMoodReflection(enrichedTracks);
             setReflection(moodText);
           } catch (err) {
             // Use dummy reflection if OpenAI fails
-            const randomReflection = dummyReflections[Math.floor(Math.random() * dummyReflections.length)];
+            const randomReflection =
+              dummyReflections[
+                Math.floor(Math.random() * dummyReflections.length)
+              ];
             setReflection(randomReflection);
           }
         }
@@ -128,17 +147,25 @@ function App() {
   }, [token, dummyReflections]);
 
   const login = () => {
-    const backendURL = process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
+    const backendURL =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
     window.location.href = `${backendURL}/login`;
   };
 
   const calculateMoodStats = () => {
-    if (!tracks.length) return { avgValence: 0, avgEnergy: 0, avgDanceability: 0 };
-    
-    const avgValence = tracks.reduce((sum, track) => sum + (track.valence || 0), 0) / tracks.length;
-    const avgEnergy = tracks.reduce((sum, track) => sum + (track.energy || 0), 0) / tracks.length;
-    const avgDanceability = tracks.reduce((sum, track) => sum + (track.danceability || 0), 0) / tracks.length;
-    
+    if (!tracks.length)
+      return { avgValence: 0, avgEnergy: 0, avgDanceability: 0 };
+
+    const avgValence =
+      tracks.reduce((sum, track) => sum + (track.valence || 0), 0) /
+      tracks.length;
+    const avgEnergy =
+      tracks.reduce((sum, track) => sum + (track.energy || 0), 0) /
+      tracks.length;
+    const avgDanceability =
+      tracks.reduce((sum, track) => sum + (track.danceability || 0), 0) /
+      tracks.length;
+
     return { avgValence, avgEnergy, avgDanceability };
   };
 
@@ -172,10 +199,12 @@ function App() {
                 Mood Waves
               </h1>
               <p className="text-xl text-gray-300 leading-relaxed">
-                Transform your Spotify listening habits into beautiful emotional insights
+                Transform your Spotify listening habits into beautiful emotional
+                insights
               </p>
               <p className="text-sm text-gray-400 max-w-md mx-auto">
-                Connect with Spotify to visualize your music's emotional journey and discover patterns in your listening habits
+                Connect with Spotify to visualize your music's emotional journey
+                and discover patterns in your listening habits
               </p>
             </div>
 
@@ -243,7 +272,7 @@ function App() {
                   </div>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-pink-500 to-pink-400 h-2 rounded-full transition-all duration-1000"
                     style={{ width: `${stats.avgValence * 100}%` }}
                   ></div>
@@ -261,7 +290,7 @@ function App() {
                   </div>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-yellow-500 to-yellow-400 h-2 rounded-full transition-all duration-1000"
                     style={{ width: `${stats.avgEnergy * 100}%` }}
                   ></div>
@@ -279,7 +308,7 @@ function App() {
                   </div>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-green-500 to-green-400 h-2 rounded-full transition-all duration-1000"
                     style={{ width: `${stats.avgDanceability * 100}%` }}
                   ></div>
@@ -295,8 +324,12 @@ function App() {
                 <FiTrendingUp className="text-xl text-white" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Emotional Landscape</h2>
-                <p className="text-gray-400 text-sm">Your mood patterns over time</p>
+                <h2 className="text-2xl font-bold text-white">
+                  Emotional Landscape
+                </h2>
+                <p className="text-gray-400 text-sm">
+                  Your mood patterns over time
+                </p>
               </div>
             </div>
             <div className="h-96 md:h-[450px] relative">
@@ -313,25 +346,29 @@ function App() {
                   <FiMusic className="text-xl text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Recent Tracks</h2>
-                  <p className="text-gray-400 text-sm">Your latest musical choices</p>
+                  <h2 className="text-2xl font-bold text-white">
+                    Recent Tracks
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Your latest musical choices
+                  </p>
                 </div>
               </div>
-              
+
               <div className="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
                 {tracks.map((track, index) => (
-                  <div 
-                    key={track.id} 
+                  <div
+                    key={track.id}
                     className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-all duration-300 group/track border border-transparent hover:border-white/10"
                     style={{
-                      animationDelay: `${index * 100}ms`
+                      animationDelay: `${index * 100}ms`,
                     }}
                   >
                     <div className="relative flex-shrink-0">
                       {track.albumCover ? (
-                        <img 
-                          src={track.albumCover} 
-                          alt="Album cover" 
+                        <img
+                          src={track.albumCover}
+                          alt="Album cover"
                           className="w-14 h-14 rounded-lg object-cover shadow-lg group-hover/track:shadow-xl transition-shadow duration-300"
                         />
                       ) : (
@@ -341,7 +378,7 @@ function App() {
                       )}
                       <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-gray-800"></div>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-white truncate group-hover/track:text-purple-300 transition-colors">
                         {track.name}
@@ -352,11 +389,15 @@ function App() {
                       <div className="flex gap-4 mt-2">
                         <div className="flex items-center gap-1 text-xs">
                           <FiHeart className="text-pink-400" />
-                          <span className="text-pink-400">{(track.valence * 100).toFixed(0)}%</span>
+                          <span className="text-pink-400">
+                            {(track.valence * 100).toFixed(0)}%
+                          </span>
                         </div>
                         <div className="flex items-center gap-1 text-xs">
                           <FiZap className="text-yellow-400" />
-                          <span className="text-yellow-400">{(track.energy * 100).toFixed(0)}%</span>
+                          <span className="text-yellow-400">
+                            {(track.energy * 100).toFixed(0)}%
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -372,33 +413,48 @@ function App() {
                   <FiClock className="text-xl text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">AI Mood Reflection</h2>
-                  <p className="text-gray-400 text-sm">Insights into your emotional journey</p>
+                  <h2 className="text-2xl font-bold text-white">
+                    AI Mood Reflection
+                  </h2>
+                  <p className="text-gray-400 text-sm">
+                    Insights into your emotional journey
+                  </p>
                 </div>
               </div>
-              
+
               {loading ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-purple-400 font-medium">Analyzing your musical emotions...</span>
+                    <span className="text-purple-400 font-medium">
+                      Analyzing your musical emotions...
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {[...Array(4)].map((_, i) => (
-                      <div key={i} className="h-4 bg-gray-700 rounded-full animate-pulse" style={{width: `${Math.random() * 40 + 60}%`}}></div>
+                      <div
+                        key={i}
+                        className="h-4 bg-gray-700 rounded-full animate-pulse"
+                        style={{ width: `${Math.random() * 40 + 60}%` }}
+                      ></div>
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="prose prose-invert max-w-none">
                   <div className="relative">
-                    <div className="absolute top-0 left-0 text-4xl text-purple-400 font-serif">"</div>
+                    <div className="absolute top-0 left-0 text-4xl text-purple-400 font-serif">
+                      "
+                    </div>
                     <p className="text-gray-300 leading-relaxed pl-8 pt-2 italic">
-                      {reflection || "Your musical journey is being analyzed..."}
+                      {reflection ||
+                        "Your musical journey is being analyzed..."}
                     </p>
-                    <div className="absolute bottom-0 right-0 text-4xl text-purple-400 font-serif transform rotate-180">"</div>
+                    <div className="absolute bottom-0 right-0 text-4xl text-purple-400 font-serif transform rotate-180">
+                      "
+                    </div>
                   </div>
-                  
+
                   {reflection && (
                     <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
                       <FiUser className="text-purple-400" />
@@ -411,14 +467,76 @@ function App() {
             </div>
           </section>
 
-          {/* Footer */}
-          <footer className="mt-16 text-center text-gray-500 text-sm">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <FiStar className="text-yellow-400" />
-              <span>Powered by Spotify & AI</span>
-              <FiStar className="text-yellow-400" />
+          {/* Enhanced Footer Section */}
+          <footer className="mt-16 text-center text-gray-500 text-sm space-y-4 relative">
+            {/* Floating Music Notes */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div className="music-note music-note-1">♪</div>
+              <div className="music-note music-note-2">♫</div>
+              <div className="music-note music-note-3">♪</div>
+              <div className="music-note music-note-4">♫</div>
+              <div className="music-note music-note-5">♪</div>
+              <div className="music-note music-note-6">♫</div>
             </div>
-            <p>Your musical emotions, beautifully visualized</p>
+
+            <div className="flex items-center justify-center gap-2 mb-2 relative z-10">
+              <FiStar className="text-yellow-400 star-twinkle" />
+              <span className="text-glow">Powered by Spotify & AI</span>
+              <FiStar
+                className="text-yellow-400 star-twinkle"
+                style={{ animationDelay: "0.5s" }}
+              />
+            </div>
+
+            <p className="relative z-10 text-shadow-sm">
+              Your musical emotions, beautifully visualized
+            </p>
+
+            {/* Enhanced Made by section with 3D effects */}
+            <div className="footer-3d-container relative z-10 pt-6 border-t border-gray-800 mt-6">
+              <div className="footer-3d-card">
+                <div className="flex items-center justify-center gap-3 p-4">
+                  <span className="text-gray-400 footer-text-slide">
+                    Made with
+                  </span>
+
+                  {/* Enhanced beating heart with 3D effect */}
+                  <div className="heart-container">
+                    <FiHeart className="beating-heart-3d text-red-500 text-2xl" />
+                    <div className="heart-pulse"></div>
+                    <div className="heart-particles">
+                      <div className="heart-particle heart-particle-1"></div>
+                      <div className="heart-particle heart-particle-2"></div>
+                      <div className="heart-particle heart-particle-3"></div>
+                      <div className="heart-particle heart-particle-4"></div>
+                    </div>
+                  </div>
+
+                  <span
+                    className="text-gray-400 footer-text-slide"
+                    style={{ animationDelay: "0.2s" }}
+                  >
+                    by
+                  </span>
+
+                  {/* Enhanced name with 3D text effect */}
+                  <div className="name-container">
+                    <span className="name-3d text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 font-bold text-lg">
+                      Vishal Dwivedy
+                    </span>
+                    <span className="name-shadow">Vishal Dwivedy</span>
+                    <div className="name-glow"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Animated background elements */}
+              <div className="footer-bg-elements">
+                <div className="footer-orb footer-orb-1"></div>
+                <div className="footer-orb footer-orb-2"></div>
+                <div className="footer-orb footer-orb-3"></div>
+              </div>
+            </div>
           </footer>
         </div>
       )}
