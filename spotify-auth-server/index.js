@@ -1,4 +1,3 @@
-// index.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -63,7 +62,6 @@ app.get("/callback", async (req, res) => {
       expires_in
     });
 
-    // ✅ Updated to redirect to root "/"
     res.redirect(`${FRONTEND_URI}/?${params}`);
   } catch (error) {
     console.error("Error getting tokens:", error.response?.data || error.message);
@@ -99,7 +97,8 @@ app.get("/refresh_token", async (req, res) => {
   }
 });
 
-const PORT = 4000;
+// ✅ Updated to use dynamic port for Render
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🎵 Spotify Auth Server running at http://localhost:${PORT}`);
 });
