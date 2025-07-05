@@ -18,6 +18,13 @@ const {
   OPENAI_API_KEY
 } = process.env;
 
+// 🔁 Log env variable to debug redirect_uri issue
+console.log("🔁 REDIRECT_URI from env:", REDIRECT_URI);
+
+if (!REDIRECT_URI) {
+  console.error("❌ REDIRECT_URI is missing. Make sure it's defined in Render → Environment tab.");
+}
+
 // 🎧 Spotify OAuth routes...
 app.get("/login", (req, res) => {
   const scopes = [
@@ -33,6 +40,7 @@ app.get("/login", (req, res) => {
     redirect_uri: REDIRECT_URI
   });
 
+  console.log("🔗 Redirecting to Spotify Auth URL:", authURL);
   res.redirect(authURL);
 });
 
