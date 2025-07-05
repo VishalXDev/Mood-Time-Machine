@@ -9,6 +9,6 @@ package-lock.json
 .env
 
 #extra files
-public
+# public
 tailwind.config.js
 postcss.config.js
