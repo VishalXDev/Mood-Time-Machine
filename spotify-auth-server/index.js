@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const axios = require("axios");
 const querystring = require("querystring");
+const { OpenAI } = require("openai");
 
 dotenv.config();
 const app = express();
@@ -13,8 +14,11 @@ const {
   CLIENT_ID,
   CLIENT_SECRET,
   REDIRECT_URI,
-  FRONTEND_URI
+  FRONTEND_URI,
+  OPENAI_API_KEY
 } = process.env;
+
+// 🎧 Spotify OAuth routes...
 
 app.get("/login", (req, res) => {
   const scopes = [
@@ -97,7 +101,41 @@ app.get("/refresh_token", async (req, res) => {
   }
 });
 
-// ✅ Updated to use dynamic port for Render
+// 🔮 New GPT Reflection Endpoint
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+
+app.post("/generate-reflection", async (req, res) => {
+  const tracks = req.body.tracks;
+  if (!tracks || !Array.isArray(tracks)) {
+    return res.status(400).json({ error: "Missing or invalid tracks" });
+  }
+
+  const moodSummary = tracks
+    .map(
+      (t) =>
+        `${t.name} by ${t.artist} - valence: ${t.valence?.toFixed(
+          2
+        )}, energy: ${t.energy?.toFixed(2)}`
+    )
+    .join("\n");
+
+  const prompt = `You're an empathetic AI mood companion. A user listened to these tracks recently:\n\n${moodSummary}\n\nBased on the audio features (valence = happiness, energy = activity), reflect on the emotional state of the listener in a short, supportive paragraph. Be friendly, insightful, and gentle.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.7,
+    });
+
+    res.json({ message: response.choices[0]?.message?.content });
+  } catch (err) {
+    console.error("❌ OpenAI error:", err);
+    res.status(500).json({ error: "Failed to generate mood reflection." });
+  }
+});
+
+// 🚀 Dynamic port
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`🎵 Spotify Auth Server running at http://localhost:${PORT}`);
